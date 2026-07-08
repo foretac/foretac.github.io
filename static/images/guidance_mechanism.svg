@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="Inter, -apple-system, sans-serif">
+  <rect width="900" height="360" fill="#FFFFFF" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#111827">Trust-Region Guided Refinement (Single Iteration)</text>
+
+  <!-- Step 1: Input action -->
+  <rect x="30" y="70" width="130" height="70" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="95" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#1D4ED8">Clean Action</text>
+  <text x="95" y="113" text-anchor="middle" font-size="9" fill="#6B7280">from DP denoising</text>
+  <text x="95" y="128" text-anchor="middle" font-size="9" fill="#6B7280">a ∈ ℝ^(H×A)</text>
+
+  <!-- Arrow -->
+  <path d="M 160 105 L 195 105" stroke="#9CA3AF" stroke-width="1.5" marker-end="url(#ga)"/>
+
+  <!-- Step 2: Foresight -->
+  <rect x="200" y="70" width="140" height="70" rx="8" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="270" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#D97706">Foresight</text>
+  <text x="270" y="113" text-anchor="middle" font-size="9" fill="#6B7280">τ̂ = f(obs, a)</text>
+  <text x="270" y="128" text-anchor="middle" font-size="9" fill="#6B7280">predict tactile</text>
+
+  <!-- Arrow -->
+  <path d="M 340 105 L 375 105" stroke="#9CA3AF" stroke-width="1.5" marker-end="url(#ga)"/>
+
+  <!-- Step 3: Energy -->
+  <rect x="380" y="70" width="140" height="70" rx="8" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="450" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#DC2626">Energy Score</text>
+  <text x="450" y="113" text-anchor="middle" font-size="9" fill="#6B7280">E(τ̂, a) → s ∈ ℝ</text>
+  <text x="450" y="128" text-anchor="middle" font-size="9" fill="#6B7280">higher = better</text>
+
+  <!-- Arrow -->
+  <path d="M 520 105 L 555 105" stroke="#9CA3AF" stroke-width="1.5" marker-end="url(#ga)"/>
+
+  <!-- Step 4: Gradient -->
+  <rect x="560" y="70" width="140" height="70" rx="8" fill="#FFF7ED" stroke="#F97316" stroke-width="1.5"/>
+  <text x="630" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#EA580C">Gradient</text>
+  <text x="630" y="113" text-anchor="middle" font-size="9" fill="#6B7280">g = ∂s / ∂a</text>
+  <text x="630" y="128" text-anchor="middle" font-size="9" fill="#6B7280">direction of ↑ quality</text>
+
+  <!-- Arrow -->
+  <path d="M 700 105 L 735 105" stroke="#9CA3AF" stroke-width="1.5" marker-end="url(#ga)"/>
+
+  <!-- Step 5: Trust-region update -->
+  <rect x="740" y="60" width="130" height="90" rx="8" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="805" y="85" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">Update</text>
+  <text x="805" y="103" text-anchor="middle" font-size="9" fill="#4B5563">a' = a + η·g/|g|</text>
+  <text x="805" y="120" text-anchor="middle" font-size="9" fill="#4B5563">project to</text>
+  <text x="805" y="135" text-anchor="middle" font-size="9" fill="#4B5563">trust region</text>
+  <text x="805" y="148" text-anchor="middle" font-size="8" fill="#9CA3AF">|a'-a₀| ≤ δ_max</text>
+
+  <!-- Constraints box -->
+  <rect x="30" y="180" width="840" height="80" rx="8" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="450" y="205" text-anchor="middle" font-size="12" font-weight="700" fill="#374151">Trust-Region Constraints</text>
+  <text x="180" y="230" text-anchor="middle" font-size="10" fill="#4B5563">step_size (η) = 0.0002</text>
+  <text x="410" y="230" text-anchor="middle" font-size="10" fill="#4B5563">max_total_delta (δ) = 0.02</text>
+  <text x="660" y="230" text-anchor="middle" font-size="10" fill="#4B5563">accept_only_improved = True</text>
+  <text x="450" y="252" text-anchor="middle" font-size="9" fill="#6B7280">If score(a') > score(a): accept update. Otherwise: reject. Repeat for 4 steps.</text>
+
+  <!-- Bottom note -->
+  <rect x="30" y="285" width="840" height="55" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+  <text x="450" y="307" text-anchor="middle" font-size="11" font-weight="600" fill="#1D4ED8">Key Property: No policy retraining required</text>
+  <text x="450" y="327" text-anchor="middle" font-size="9" fill="#6B7280">Foresight and Energy weights are frozen. Only the action tensor receives gradients.</text>
+
+  <!-- Defs -->
+  <defs>
+    <marker id="ga" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#9CA3AF"/>
+    </marker>
+  </defs>
+</svg>

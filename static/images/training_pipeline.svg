@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 400" font-family="Inter, -apple-system, sans-serif">
+  <rect width="1100" height="400" fill="#FFFFFF" rx="12"/>
+
+  <!-- Title -->
+  <text x="550" y="35" text-anchor="middle" font-size="14" font-weight="700" fill="#111827">Four-Stage Training Pipeline</text>
+
+  <!-- Stage 1: TacVAE -->
+  <rect x="40" y="60" width="220" height="130" rx="10" fill="#F0FDF4" stroke="#10B981" stroke-width="2"/>
+  <text x="150" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#059669">STAGE ①</text>
+  <text x="150" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#374151">TacVAE</text>
+  <text x="150" y="125" text-anchor="middle" font-size="11" fill="#374151">Pretraining</text>
+  <text x="150" y="148" text-anchor="middle" font-size="9" fill="#6B7280">Input: marker_offset (B,8,9,9,2)</text>
+  <text x="150" y="162" text-anchor="middle" font-size="9" fill="#6B7280">CausalConv3D Encoder → Latent 8×3×3</text>
+  <text x="150" y="176" text-anchor="middle" font-size="9" fill="#6B7280">INR Decoder → Reconstruct</text>
+  <text x="150" y="188" text-anchor="middle" font-size="8" fill="#9CA3AF">Self-supervised (no labels needed)</text>
+
+  <!-- Arrow 1→2 -->
+  <path d="M 260 125 L 295 125" stroke="#10B981" stroke-width="2" marker-end="url(#ta)"/>
+  <text x="277" y="115" text-anchor="middle" font-size="8" font-weight="600" fill="#10B981">freeze</text>
+  <text x="277" y="140" text-anchor="middle" font-size="8" fill="#10B981">encoder</text>
+
+  <!-- Stage 2: Foresight -->
+  <rect x="300" y="60" width="220" height="130" rx="10" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2"/>
+  <text x="410" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#D97706">STAGE ②</text>
+  <text x="410" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#374151">Foresight Transformer</text>
+  <text x="410" y="125" text-anchor="middle" font-size="11" fill="#374151">Pretraining</text>
+  <text x="410" y="148" text-anchor="middle" font-size="9" fill="#6B7280">❄ Frozen: ResNet18 + TacVAE encoder</text>
+  <text x="410" y="162" text-anchor="middle" font-size="9" fill="#6B7280">✅ Train: ForesightLayers + decoder</text>
+  <text x="410" y="176" text-anchor="middle" font-size="9" fill="#6B7280">Loss: latent L1 + marker recon + Δt</text>
+  <text x="410" y="188" text-anchor="middle" font-size="8" fill="#9CA3AF">Predict H-step future tactile latent</text>
+
+  <!-- Arrow 2→3 -->
+  <path d="M 520 125 L 555 125" stroke="#F59E0B" stroke-width="2" marker-end="url(#ta2)"/>
+  <text x="537" y="115" text-anchor="middle" font-size="8" font-weight="600" fill="#D97706">freeze</text>
+  <text x="537" y="140" text-anchor="middle" font-size="8" fill="#D97706">(optional)</text>
+
+  <!-- Stage 3: Diffusion Policy -->
+  <rect x="560" y="60" width="220" height="130" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="670" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#1D4ED8">STAGE ③</text>
+  <text x="670" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#374151">Diffusion Policy</text>
+  <text x="670" y="125" text-anchor="middle" font-size="11" fill="#374151">Training</text>
+  <text x="670" y="148" text-anchor="middle" font-size="9" fill="#6B7280">❄ Frozen: TacVAE encoder</text>
+  <text x="670" y="162" text-anchor="middle" font-size="9" fill="#6B7280">✅ Train: ResNet18 + UNet1D</text>
+  <text x="670" y="176" text-anchor="middle" font-size="9" fill="#6B7280">Loss: MSE(noise_pred, noise)</text>
+  <text x="670" y="188" text-anchor="middle" font-size="8" fill="#9CA3AF">+ optional foresight aux loss (joint)</text>
+
+  <!-- Arrow 3→4 -->
+  <path d="M 780 125 L 815 125" stroke="#3B82F6" stroke-width="2" marker-end="url(#ta3)"/>
+
+  <!-- Stage 4: Energy Scorer -->
+  <rect x="820" y="60" width="220" height="130" rx="10" fill="#FEF2F2" stroke="#EF4444" stroke-width="2"/>
+  <text x="930" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#DC2626">STAGE ④</text>
+  <text x="930" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#374151">Energy Scorer</text>
+  <text x="930" y="125" text-anchor="middle" font-size="11" fill="#374151">Training</text>
+  <text x="930" y="148" text-anchor="middle" font-size="9" fill="#6B7280">❄ Frozen: TacVAE encoder</text>
+  <text x="930" y="162" text-anchor="middle" font-size="9" fill="#6B7280">✅ Train: Multi-head scorer</text>
+  <text x="930" y="176" text-anchor="middle" font-size="9" fill="#6B7280">Loss: CE + expert margin</text>
+  <text x="930" y="188" text-anchor="middle" font-size="8" fill="#9CA3AF">Data: success + failure + perturbed</text>
+
+  <!-- Bottom: Data source -->
+  <rect x="40" y="230" width="1000" height="60" rx="8" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="550" y="255" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">Shared Data Source: HDF5 Episodes</text>
+  <text x="550" y="275" text-anchor="middle" font-size="9" fill="#6B7280">images | proprio | marker_offset (9×9×2) | force6d | actions (joint/EEF) | success/failure labels</text>
+
+  <!-- Data arrows up -->
+  <line x1="150" y1="230" x2="150" y2="195" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="410" y1="230" x2="410" y2="195" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="670" y1="230" x2="670" y2="195" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="930" y1="230" x2="930" y2="195" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="3,2"/>
+
+  <!-- Legend -->
+  <rect x="40" y="320" width="1000" height="55" rx="8" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="60" y="345" font-size="10" font-weight="600" fill="#374151">Legend:</text>
+  <rect x="110" y="335" width="12" height="12" fill="#10B981" rx="2"/>
+  <text x="128" y="346" font-size="9" fill="#374151">TacVAE (base representation)</text>
+  <rect x="300" y="335" width="12" height="12" fill="#F59E0B" rx="2"/>
+  <text x="318" y="346" font-size="9" fill="#374151">Foresight (prediction)</text>
+  <rect x="460" y="335" width="12" height="12" fill="#3B82F6" rx="2"/>
+  <text x="478" y="346" font-size="9" fill="#374151">Diffusion Policy (generation)</text>
+  <rect x="660" y="335" width="12" height="12" fill="#EF4444" rx="2"/>
+  <text x="678" y="346" font-size="9" fill="#374151">Energy Scorer (evaluation)</text>
+  <text x="860" y="346" font-size="9" fill="#6B7280">❄ = frozen weights</text>
+  <text x="970" y="346" font-size="9" fill="#6B7280">✅ = trainable</text>
+
+  <!-- Defs -->
+  <defs>
+    <marker id="ta" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#10B981"/>
+    </marker>
+    <marker id="ta2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#F59E0B"/>
+    </marker>
+    <marker id="ta3" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#3B82F6"/>
+    </marker>
+  </defs>
+</svg>

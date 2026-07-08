@@ -60,10 +60,7 @@
 
     <!-- Teaser -->
     <div class="teaser">
-      <div class="placeholder">
-        <span>Teaser figure: ForeTac pipeline overview<br>(obs → DP → clean action → foresight → energy → refine → execute)</span>
-      </div>
-      <!-- Replace with: <img src="static/images/teaser.png" alt="ForeTac overview"> -->
+      <img src="static/images/teaser.svg" alt="ForeTac overview: Predict → Score → Guide">
     </div>
   </div>
 </section>
@@ -126,20 +123,14 @@
     <!-- Training pipeline -->
     <h3>Training Pipeline</h3>
     <div class="method-fig">
-      <div class="placeholder">
-        <span>Training pipeline figure<br>Stage 1: TacVAE → Stage 2: Foresight → Stage 3: DP → Stage 4: Energy Scorer</span>
-      </div>
-      <!-- Replace with: <img src="static/images/training_pipeline.png" alt="Training Pipeline"> -->
+      <img src="static/images/training_pipeline.svg" alt="Training Pipeline">
     </div>
     <p class="fig-caption"><strong>Figure 2.</strong> Four-stage training pipeline. Each stage builds on frozen modules from previous stages. TacVAE provides tactile representations; Foresight learns to predict future latents; DP generates actions; Energy Scorer learns contact quality assessment.</p>
 
     <!-- Guidance mechanism -->
     <h3>Inference-Time Guidance</h3>
     <div class="method-fig">
-      <div class="placeholder">
-        <span>Guidance mechanism figure<br>Clean action → Foresight predict → Energy score → Gradient → Trust-region projection → Guided action</span>
-      </div>
-      <!-- Replace with: <img src="static/images/guidance_mechanism.png" alt="Guidance Mechanism"> -->
+      <img src="static/images/guidance_mechanism.svg" alt="Guidance Mechanism">
     </div>
     <p class="fig-caption"><strong>Figure 3.</strong> Trust-region guided refinement. The energy score gradient with respect to the action provides a direction of improvement. Each step is projected back into a bounded trust region around the original action, ensuring stability.</p>
   </div>
@@ -243,63 +234,7 @@
   </div>
 </section>
 
-<!-- ============ COMPARISON WITH RELATED WORK ============ -->
-<section id="comparison" class="section-alt">
-  <div class="container">
-    <h2>Comparison with Related Work</h2>
-    <div class="comparison-table-wrap">
-      <table class="comparison-table">
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Tactile Prediction</th>
-            <th>Action Modification</th>
-            <th>Inference-Time</th>
-            <th>Policy Agnostic</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>DP + TacVAE Fusion</td>
-            <td><i class="fas fa-xmark no"></i></td>
-            <td><i class="fas fa-xmark no"></i></td>
-            <td><i class="fas fa-xmark no"></i></td>
-            <td><i class="fas fa-xmark no"></i></td>
-          </tr>
-          <tr>
-            <td>DynaGuide</td>
-            <td><i class="fas fa-xmark no"></i> (visual)</td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-check yes"></i></td>
-          </tr>
-          <tr>
-            <td>TacForeSight</td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-xmark no"></i> (internal)</td>
-            <td><i class="fas fa-xmark no"></i></td>
-            <td><i class="fas fa-xmark no"></i></td>
-          </tr>
-          <tr>
-            <td>ViTaL-Steering</td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-check yes"></i> (reranking)</td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-check yes"></i></td>
-          </tr>
-          <tr class="highlight-row">
-            <td><strong>ForeTac (Ours)</strong></td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-check yes"></i> (gradient)</td>
-            <td><i class="fas fa-check yes"></i></td>
-            <td><i class="fas fa-check yes"></i></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="fig-caption"><strong>Table 3.</strong> ForeTac uniquely combines tactile prediction with differentiable gradient-based action modification at inference time, without requiring retraining or expensive multi-candidate verification.</p>
-  </div>
-</section>
+
 
 <!-- ============ BIBTEX ============ -->
 <section id="bibtex">
