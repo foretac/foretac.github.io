@@ -30,12 +30,12 @@
   <!-- Arrow: Obs → DP -->
   <path d="M 130 160 L 165 160" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr-t)"/>
 
-  <!-- Diffusion Policy -->
+  <!-- Base Policy (Policy-agnostic) -->
   <rect x="170" y="110" width="130" height="100" rx="8" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="235" y="145" text-anchor="middle" font-size="12" font-weight="700" fill="#93C5FD">Diffusion</text>
-  <text x="235" y="163" text-anchor="middle" font-size="12" font-weight="700" fill="#93C5FD">Policy</text>
-  <text x="235" y="190" text-anchor="middle" font-size="9" fill="#94A3B8">DDPM → clean</text>
-  <text x="235" y="203" text-anchor="middle" font-size="9" fill="#94A3B8">action chunk</text>
+  <text x="235" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#93C5FD">Base Policy</text>
+  <text x="235" y="162" text-anchor="middle" font-size="9" fill="#94A3B8">Diffusion / Flow</text>
+  <text x="235" y="176" text-anchor="middle" font-size="9" fill="#94A3B8">Matching</text>
+  <text x="235" y="198" text-anchor="middle" font-size="9" fill="#64748B">→ action chunk</text>
 
   <!-- Arrow: DP → Predict -->
   <path d="M 300 160 L 335 160" stroke="#EA580C" stroke-width="2" marker-end="url(#arr-orange)"/>
