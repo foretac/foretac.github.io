@@ -1,0 +1,56 @@
+{
+  "vase": {
+    "name": "vase",
+    "frames": 502,
+    "steps": 429,
+    "phases": [
+      [
+        "Approach",
+        0,
+        18
+      ],
+      [
+        "Contact",
+        18,
+        43
+      ],
+      [
+        "Wiping",
+        43,
+        332
+      ],
+      [
+        "Release",
+        332,
+        428
+      ]
+    ]
+  },
+  "card": {
+    "name": "card",
+    "frames": 242,
+    "steps": 318,
+    "phases": [
+      [
+        "Approach",
+        0,
+        108
+      ],
+      [
+        "Contact",
+        108,
+        127
+      ],
+      [
+        "Wiping",
+        127,
+        274
+      ],
+      [
+        "Release",
+        274,
+        317
+      ]
+    ]
+  }
+}
