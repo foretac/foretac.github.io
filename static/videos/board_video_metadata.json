@@ -1,0 +1,16 @@
+{
+  "board_real": "/home/chenshuai/Project/TactileACT-cs/tmp_vtm_ProjectPage/static/videos/board_real.mp4",
+  "board_viz": "/home/chenshuai/Project/TactileACT-cs/tmp_vtm_ProjectPage/static/videos/board_viz.mp4",
+  "preview_real": "/home/chenshuai/Project/TactileACT-cs/tmp_vtm_ProjectPage/static/videos/board_real_preview.jpg",
+  "preview_viz": "/home/chenshuai/Project/TactileACT-cs/tmp_vtm_ProjectPage/static/videos/board_viz_preview.jpg",
+  "fps": 24.0,
+  "frames": 748,
+  "size": [
+    1280,
+    720
+  ],
+  "speed_label": "4x speed",
+  "board_viz_layout": "GT/Pred marker panels on the left; force, tactile score, and adaptive guidance scale on the right with in-axis moving cursors",
+  "source_trial": "caheiban_260609/20260708_180826_port8781_episode_6",
+  "step_count": 865
+}
