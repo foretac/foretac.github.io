@@ -10,6 +10,7 @@
     720
   ],
   "speed_label": "4x speed",
+  "browser_video_codec": "h264 avc1 yuv420p",
   "board_viz_layout": "GT/Pred marker panels on the left; force, tactile score, and adaptive guidance scale on the right with in-axis moving cursors",
   "source_trial": "caheiban_260609/20260708_180826_port8781_episode_6",
   "step_count": 865
