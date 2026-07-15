@@ -98,6 +98,27 @@ ForeTac 项目网页在四个任务中分别并排展示真实执行视频（`*_
 
 运行时仅阻止原 `waiting` handler 重入后进行对照测试，左右视频立即正常播放：3 秒后 `board_real` 和 `board_viz` 的播放时间差约为 9 ms，两个 spinner 均消失。这证明持续转圈的直接原因是同步逻辑重入，而不是视频文件或本地打开协议。
 
+### 3.7 与 PACE 网页实现对照
+
+问题发生后重新检查 `/home/chenzhiyuan/projects/PACE-anon/index.html` 中已经验证过的 `syncPair` 实现。PACE 的核心机制很简单：
+
+1. 初次播放前等待一对视频都达到 `canplaythrough` 或 `readyState >= 4`。
+2. 双方就绪后统一归零并在同一轮任务中调用 `play()`。
+3. 任一视频结束时同时暂停、归零并重新播放。
+4. 不在 `waiting/stalled` 回调中递归启动完整同步流程，也不每 500 ms 强制 seek。
+
+ForeTac 仍需保留 PACE 没有覆盖的 viewport 懒加载、离开视口暂停和真实 spinner 状态，但同步播放的核心本应优先复用 PACE 已验证的单次启动原则。此次错误是没有在实现前逐行审查 PACE 的状态机，而是在简单同步需求上自行叠加缓冲恢复、周期校时和 seek，造成媒体事件反馈循环。
+
+媒体量化对比进一步说明了公网加载慢的原因：
+
+- ForeTac 四组任务的 8 个原视频合计 36.89 MiB；PACE 同步区的 4 个视频合计 26.49 MiB，ForeTac 同步区总量高 39.3%。
+- ForeTac 有 4 个同步对，PACE 有 2 个同步对；ForeTac 的 `IntersectionObserver` 使用 320 px root margin，相邻视频对可能同时激活。
+- ForeTac 单对合计码率约为 3.17-4.72 Mbps，PACE 单对约为 5.99-6.05 Mbps，因此不能声称 ForeTac 单对天然比 PACE 更重。
+- ForeTac 原视频关键帧最大间隔约 10.417 秒，部分视频整段只有首关键帧；PACE 同步视频约为 5-8.33 秒。ForeTac 在弱网 seek 和恢复时更不利。
+- ForeTac 最大的任务视频是 `board_real.mp4`（11.11 MiB、约 2.99 Mbps），不是右侧可视化视频。只压缩 4 个 `*_viz.mp4` 不能解决同步对由较慢一侧决定加载速度的问题。
+
+结论需要分层：本地持续转圈的正确性问题只由 JavaScript 修复；公网加载性能则确实需要额外优化全部 8 个任务视频。
+
 ## 4. 根因结论
 
 右侧 `*_viz.mp4` 经常卡住包含两个层面：
@@ -107,20 +128,26 @@ ForeTac 项目网页在四个任务中分别并排展示真实执行视频（`*_
 
 ## 5. 解决方案
 
-### 5.1 保留原始文件
+### 5.1 重新编码实验与最终媒体决策
 
-四个原始可视化视频逐字节保留为：
+排查初期曾将四个原始可视化视频逐字节复制为：
 
 - `board_viz_raw.mp4`
 - `vase_viz_raw.mp4`
 - `card_viz_raw.mp4`
 - `chip_viz_raw.mp4`
 
-通过 SHA-256 对比确认，`*_viz_raw.mp4` 与重新编码前相应的 `*_viz.mp4` 完全一致。
+通过 SHA-256 对比确认，实验期间的 `*_viz_raw.mp4` 与重新编码前相应的 `*_viz.mp4` 完全一致。
 
-### 5.2 生成网页优化版本
+浏览器事件诊断确认持续转圈由 JavaScript 重入直接造成后，曾使用原始视频配合修复后的 JavaScript 重新测试。该阶段先恢复原始 `*_viz.mp4` 并移除四个重复的 `*_viz_raw.mp4`，用于证明重新编码不是正确性修复的必要条件。
 
-网页继续引用原文件名 `*_viz.mp4`，但文件内容重新编码为：
+恢复阶段再次对比 SHA-256，确认当时的 `*_viz.mp4` 与重新编码前原始文件逐字节一致。
+
+随后用户确认公网加载仍慢。完成上述 PACE 量化对比后，最终媒体策略调整为：优化全部 8 个任务视频，并为每个文件保留 `_raw` 原始副本。当前目录中的 8 个 `_raw.mp4` 均与修改前文件逐字节一致。
+
+### 5.2 重新编码实验参数（已撤销）
+
+为排除带宽、分辨率和 GOP 的影响，实验中曾将网页文件重新编码为：
 
 - 分辨率：1280x720
 - 固定帧率：15 fps
@@ -147,6 +174,8 @@ ffmpeg -i INPUT_RAW.mp4 \
   -movflags +faststart OUTPUT_WEB.mp4
 ```
 
+该实验能够降低传输量和关键帧间隔，但不能解决由 JavaScript 事件重入造成的本地持续转圈。确认原始视频在修复后的状态机中可正常播放后，曾临时撤销这些媒体改动，以隔离正确性问题和性能问题。
+
 ### 5.3 修复同步播放重入
 
 同步 JavaScript 采用以下修复：
@@ -157,7 +186,27 @@ ffmpeg -i INPUT_RAW.mp4 \
 4. seek 完成后再次等待两个视频达到 `HAVE_FUTURE_DATA`，再同时调用 `play()`。
 5. 周期漂移修正不再直接修改 `currentTime`，统一进入带防重入保护的同步流程。
 
+### 5.4 最终全部任务视频优化
+
+公网性能对比确认有必要优化完整同步对后，对 `board/vase/card/chip` 的 `real` 和 `viz` 共 8 个文件统一处理：
+
+- 原始文件：保留为对应的 `*_raw.mp4`
+- 网页分辨率：1280x720
+- 固定帧率：24 fps
+- 编码：H.264 High Profile, Level 4.0
+- 像素格式：`yuv420p`
+- CRF：23
+- 最大码率：1200 kbps
+- VBV Buffer：2400 kb
+- GOP：48 帧，即每 2 秒一个关键帧
+- MP4 Fast Start：启用
+- 音频：不写入
+
+最终采用 24 fps 而不是初次实验的 15 fps，以保留真实机器人动作的流畅度；同时对左右两侧使用完全相同的帧率和编码时间轴，确保每对输出时长严格一致。
+
 ## 6. 解决后的验证结果
+
+### 6.1 重新编码实验结果（未作为最终媒体）
 
 | 文件 | 优化后码率 | 优化后大小 | 原始大小 | 关键帧最大间隔 |
 | --- | ---: | ---: | ---: | ---: |
@@ -166,7 +215,7 @@ ffmpeg -i INPUT_RAW.mp4 \
 | `card_viz.mp4` | 0.80 Mbps | 0.98 MB | 2.3 MB | 1.000 s |
 | `chip_viz.mp4` | 0.90 Mbps | 1.6 MB | 3.6 MB | 1.000 s |
 
-四个网页视频合计由约 17.3 MB 降至约 7.8 MB，减少约 55%。
+实验中四个网页视频合计由约 17.3 MB 降至约 7.8 MB，减少约 55%。
 
 重新编码造成的时长取整误差均小于一个 15 fps 帧：
 
@@ -177,16 +226,20 @@ ffmpeg -i INPUT_RAW.mp4 \
 | Card Swiping | 10.084 s | 10.067 s | 0.017 s |
 | Chip Grasping | 14.125 s | 14.134 s | 0.009 s |
 
-抽取四个优化版视频在 5 秒位置的画面进行人工检查，触觉图、曲线、图例和数值仍可辨认。优化后预期效果是：
+抽取四个实验压缩版视频在 5 秒位置的画面进行人工检查，触觉图、曲线、图例和数值仍可辨认。该实验说明：
 
 1. 右侧视频首播和缓冲恢复所需的数据量显著下降。
 2. 同步校时后最多只需回溯约 1 秒的关键帧，而不是 10 秒以上或回到视频开头。
 3. 弱网下出现长时间转圈和整组停播的概率降低。
 4. 原始 1080p 文件仍随仓库保留，后续可以重新调整编码参数。
 
+这些结果只证明初次重新编码方案技术上可用，不代表它是本次持续转圈问题的必要解决方案。
+
+### 6.2 JavaScript 修复验证
+
 初次本地网页冒烟测试确认页面、视频容器和 spinner 可以渲染，但右侧持续转圈；该结果触发了上述 Chrome DevTools Protocol 深入诊断，不能视为播放验证通过。
 
-同步代码修复后，使用全新 Chrome profile、1280x900 viewport，分别在 `file://` 和本地 HTTP 下依次滚动到四个任务，每组持续观察 3 秒。结果如下：
+同步代码修复后，先使用实验压缩版视频和全新 Chrome profile、1280x900 viewport，分别在 `file://` 和本地 HTTP 下依次滚动到四个任务，每组持续观察 3 秒。结果如下：
 
 - 四组左右视频全部达到 `readyState=4`。
 - 四组视频均为 `paused=false`、`seeking=false`、`error=null`。
@@ -196,7 +249,45 @@ ffmpeg -i INPUT_RAW.mp4 \
 - 修复后每个视频在 3 秒内通常只产生 11-12 个正常 `timeupdate`，未再出现事件风暴。
 - Headless Chrome renderer 平均 CPU 约为 26%，较修复前约 168% 明显下降。
 
-本地两种打开方式均验证通过。线上播放结果将在发布后补充。
+该测试证明 JavaScript 重入已修复。
+
+### 6.3 恢复原视频后的隔离验证
+
+为确认 JavaScript 修复不依赖重新编码，曾恢复四个原始 1080p `*_viz.mp4`，并在 `file://` 与本地 HTTP 下重新测试：
+
+- 四组左右视频全部 `readyState=4`、`paused=false`、`seeking=false`、`error=null`。
+- 所有 spinner 均消失，3 秒内每个视频只有 10-11 个正常 `timeupdate`。
+- 全程没有 `waiting/stalled/seeking/seeked/error` 事件风暴。
+- `file://` 最大同步误差为 1.359 ms；本地 HTTP 最大同步误差为 2.215 ms。
+
+该结果确认：原视频能够正确播放，持续转圈确由 JavaScript 重入造成。
+
+### 6.4 最终 8 个网页视频验证
+
+| 文件 | 原始大小 | 网页大小 | 网页码率 | 关键帧最大间隔 |
+| --- | ---: | ---: | ---: | ---: |
+| `board_real.mp4` | 11.11 MiB | 4.43 MiB | 1.19 Mbps | 2.000 s |
+| `board_viz.mp4` | 6.44 MiB | 2.18 MiB | 0.59 Mbps | 2.000 s |
+| `vase_real.mp4` | 4.50 MiB | 2.66 MiB | 1.06 Mbps | 2.000 s |
+| `vase_viz.mp4` | 4.89 MiB | 1.58 MiB | 0.63 Mbps | 2.000 s |
+| `card_real.mp4` | 1.58 MiB | 0.90 MiB | 0.74 Mbps | 2.000 s |
+| `card_viz.mp4` | 2.24 MiB | 0.73 MiB | 0.60 Mbps | 2.000 s |
+| `chip_real.mp4` | 2.58 MiB | 1.43 MiB | 0.84 Mbps | 2.000 s |
+| `chip_viz.mp4` | 3.55 MiB | 1.12 MiB | 0.66 Mbps | 2.000 s |
+
+8 个网页任务视频总量从 38,684,447 字节降至 15,752,291 字节，减少 59.3%。四组左右视频的输出时长分别严格一致：31.167、20.917、10.084、14.125 秒。
+
+通过 SHA-256 确认 8 个 `_raw.mp4` 均与修改前原文件一致。抽取每个网页视频 5 秒处画面进行人工检查，真实机器人画面、触觉点阵、曲线、图例和数值均保持清晰。
+
+使用全新 Chrome profile 对最终 8 个网页视频进行逐组播放测试：
+
+- `file://` 下四组最大同步误差为 1.818 ms。
+- 本地 HTTP 下四组最大同步误差为 1.954 ms。
+- 所有视频均为 `readyState=4`、`paused=false`、`seeking=false`、`error=null`。
+- 所有 spinner 均正常消失，每个视频只产生正常频率的 `timeupdate`。
+- 未出现 `waiting/stalled/seeking/error` 或事件风暴。
+
+同一轮修改还根据最终实验矩阵更新了 Results 章节。使用 1280x900 桌面 viewport 和 390x844 移动 viewport 检查表格：单元格无重叠，横向滚动限制在表格容器内，移动页面本身没有横向溢出。
 
 ## 7. Git 同步记录
 
@@ -209,5 +300,11 @@ ffmpeg -i INPUT_RAW.mp4 \
 3. 本地分支和 GitLab 已分叉，因此先 fetch GitLab，再使用普通 merge 将合作者内容与本地视频同步功能合并。
 4. 合并由 Git 的 `ort` 策略自动完成，没有发生文本冲突；合作者新增的图、JSON、绘图工具和网页内容均得到保留。
 5. 提交前分别 fetch 两个 GitHub `main`；两个远端均无本地尚未包含的新提交。
+6. 首次修复提交为 `0c9ed5c`，其中包含 JavaScript 修复、重新编码视频、`_raw` 副本和本文档。
+7. `0c9ed5c` 曾同步到 GitLab `ProjectPage`、GitHub `Foretac/main` 和 GitHub `foretac.github.io/main`，三个远端均推送成功。
+8. GitHub Pages 随后更新到 `0c9ed5c`，确认 HTML、Markdown、`video/mp4`、HTTP Range 和 `206 Partial Content` 响应正常。
+9. 确认 JavaScript 才是直接根因后，曾恢复原始视频并移除 `_raw` 重复副本，以完成不依赖转码的隔离复测；该中间状态未作为最终媒体方案发布。
+10. 用户反馈公网加载仍慢后，量化比较 PACE 与 ForeTac 媒体负载，确认性能层面应优化完整的 8 个任务视频。
+11. 最终重新创建 8 个 `_raw` 原始副本，并生成 720p、24 fps、短 GOP 网页版本；本轮同时按用户给定实验矩阵更新 Results 章节。
 
-待本次媒体提交和发布完成后，在此补充 GitLab、ForeTac GitHub 项目仓库和 GitHub Pages 仓库的最终提交哈希及在线验证结果。
+待本次媒体提交和发布完成后，在此补充 GitLab `ProjectPage` 和 GitHub `foretac.github.io/main` 的最终提交哈希及在线验证结果。

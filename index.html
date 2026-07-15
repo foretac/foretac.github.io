@@ -136,7 +136,7 @@
     <h2 class="section-title">Results</h2>
 
     <h3>Main Comparison</h3>
-    <p class="section-lead">We compare ForeTac against visual-only Diffusion Policy, reactive tactile fusion, and state-of-the-art tactile prediction methods (OmniVTA, TacForeSight) across all four tasks.</p>
+    <p class="section-lead">We compare ForeTac with representative action-chunking, diffusion, flow-matching, reactive tactile, and predictive tactile policies across all four contact-rich tasks.</p>
     <div class="content-card results-table-card">
       <table class="comp-table main-results-table">
         <thead>
@@ -160,42 +160,49 @@
         </thead>
         <tbody>
           <tr>
-            <td>Base DP<span class="note">visual-only diffusion policy</span></td>
+            <td>ACT<span class="note">action chunking with transformers</span></td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr>
-            <td>DP+TacVAE Fusion<span class="note">reactive tactile fusion</span></td>
+            <td>Diffusion Policy<span class="note">visual-only diffusion policy</span></td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr>
-            <td>OmniVTA<span class="note">tactile prediction baseline</span></td>
+            <td>&pi;0.5<span class="note">flow-matching policy</span></td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr>
-            <td>TacForeSight<span class="note">tactile prediction baseline</span></td>
+            <td>DP + Tac<sub>cat</sub><span class="note">reactive tactile concatenation</span></td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
-          <tr class="row-ours">
-            <td>ForeTac (Independent)<span class="note">foresight and guidance trained independently</span></td>
+          <tr>
+            <td>RDP<span class="note">reactive tactile diffusion policy</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>ForeAR<span class="note">autoregressive tactile foresight policy</span></td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr class="row-ours row-ours-primary">
-            <td>ForeTac (Full)<span class="note">full foresight-guided policy</span></td>
+            <td>ForeTac (Ours)<span class="note">foresight-guided action refinement</span></td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
@@ -207,16 +214,88 @@
     <p class="fig-caption"><strong>Table 1.</strong> Success rate and safe success rate comparison. Safe success counts trials that complete the task while avoiding unsafe contact, emergency stops, or damaging interactions.</p>
 
     <h3>Ablation Study</h3>
-    <div class="content-card">
-      <div class="placeholder"><span>Ablation results<br>w/o failure negatives in energy training | w/o trust-region (unconstrained) | guidance vs. reranking | foresight horizon sweep (H=4/8/16)</span></div>
+    <div class="content-card results-table-card">
+      <table class="comp-table ablation-results-table">
+        <thead>
+          <tr>
+            <th>Variant</th>
+            <th>Success Rate &uarr;</th>
+            <th>Safe Success Rate &uarr;</th>
+            <th>Contact Failure &darr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-ours row-ours-primary">
+            <td>ForeTac (Full)<span class="note">prediction + score + trust-region guidance</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>w/o Prediction<span class="note">current-contact guidance with the same scorer and refinement procedure</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>w/o Score<span class="note">remove learned contact-quality scoring</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>w/o Guidance<span class="note">remove gradient-based action refinement</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>Prediction + Score + Reranking<span class="note">select among sampled actions without gradient guidance</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>Prediction as Policy Input<span class="note">concatenate predicted tactile features to the policy input</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>Joint Prediction-Policy Training<span class="note">jointly optimize the prediction module and policy</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>Only [Component TBD]<span class="note">single-component control to be specified</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <p class="fig-caption"><strong>Table 2.</strong> Ablation study showing the contribution of each component.</p>
 
+    <h3>Tactile Reconstruction</h3>
+    <div class="content-card results-table-card">
+      <table class="comp-table module-results-table">
+        <thead>
+          <tr>
+            <th>Representation</th>
+            <th>Reconstruction Error &darr;</th>
+            <th>Downstream Safe Success Rate &uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PCA-AE<span class="note">linear reconstruction baseline</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>PointNet-AE<span class="note">point-set autoencoder baseline</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr class="row-ours row-ours-primary">
+            <td>TacVAE (Ours)<span class="note">latent tactile representation used by ForeTac</span></td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fig-caption"><strong>Table 3.</strong> Reconstruction quality and downstream control performance for tactile representation modules.</p>
+
     <h3>Foresight Prediction Quality</h3>
+    <p class="section-lead">Prediction accuracy is evaluated across foresight horizons. Final results will report the mean and variance over evaluation windows for every prediction metric.</p>
     <div class="content-card">
       <img src="static/images/foresight_prediction_quality_horizons.png" alt="Foresight prediction quality across horizons">
     </div>
-    <p class="fig-caption"><strong>Figure 4.</strong> Tactile foresight prediction accuracy across horizons H=1, 4, 8, 12, 16, measured by latent MAE, latent cosine similarity, and marker reconstruction error.</p>
+    <p class="fig-caption"><strong>Figure 4.</strong> Tactile foresight prediction accuracy across horizons H=1, 4, 8, 12, 16, measured by latent MAE, latent cosine similarity, and marker reconstruction error. The current curves show mean &plusmn; SEM over 32 validation windows; final reporting will include the corresponding mean and variance.</p>
 
     <h3>Guidance Diagnostics</h3>
     <p class="section-lead">
