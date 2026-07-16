@@ -136,31 +136,35 @@
     <h2 class="section-title">Results</h2>
 
     <h3>Main Comparison</h3>
-    <p class="section-lead">We compare Ours against DP, DP+tactile, π0.5, RDP, and ForeAR across all four tasks.</p>
+    <p class="section-lead">We compare Ours against DP, DP+tactile, π0.5, RDP, and ForeAR across five contact-rich tasks.</p>
     <div class="content-card results-table-card">
       <table class="comp-table main-results-table">
         <thead>
-          <tr>
+          <tr class="task-header">
             <th rowspan="2">Method</th>
-            <th colspan="2">Board Wiping</th>
-            <th colspan="2">Vase Wiping</th>
-            <th colspan="2">Card Swiping</th>
-            <th colspan="2">Chip Grasping</th>
+            <th colspan="2">Board</th>
+            <th colspan="2">Vase</th>
+            <th colspan="2">Card</th>
+            <th colspan="2">Chip</th>
+            <th colspan="2">Socket</th>
           </tr>
           <tr class="metric-header">
-            <th>Success Rate ↑</th>
-            <th>Safe Success Rate ↑</th>
-            <th>Success Rate ↑</th>
-            <th>Safe Success Rate ↑</th>
-            <th>Success Rate ↑</th>
-            <th>Safe Success Rate ↑</th>
-            <th>Success Rate ↑</th>
-            <th>Safe Success Rate ↑</th>
+            <th>Success ↑</th>
+            <th>Safe Success ↑</th>
+            <th>Success ↑</th>
+            <th>Safe Success ↑</th>
+            <th>Success ↑</th>
+            <th>Safe Success ↑</th>
+            <th>Success ↑</th>
+            <th>Safe Success ↑</th>
+            <th>Success ↑</th>
+            <th>Safe Success ↑</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>DP</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
@@ -172,9 +176,11 @@
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr>
             <td>π0.5</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
@@ -186,6 +192,7 @@
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr>
             <td>ForeAR</td>
@@ -193,9 +200,11 @@
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr class="row-ours row-ours-primary">
             <td>Ours</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
@@ -255,40 +264,76 @@
     </div>
     <p class="fig-caption"><strong>Table 2.</strong> Ablation study showing the contribution of each component.</p>
 
-    <h3>Tactile Reconstruction</h3>
+    <h3>Latent Reconstruction Quality</h3>
+    <p class="section-lead">TacVAE compresses tactile marker displacement histories into compact latent maps, then decodes them back to marker displacement fields before downstream foresight prediction.</p>
     <div class="content-card results-table-card">
-      <table class="comp-table module-results-table">
+      <table class="comp-table tactile-results-table">
         <thead>
-          <tr>
-            <th>Representation</th>
-            <th>Reconstruction Error &darr;</th>
-            <th>Downstream Safe Success Rate &uarr;</th>
+          <tr class="task-header">
+            <th rowspan="2">Encoder</th>
+            <th colspan="2">Board</th>
+            <th colspan="2">Vase</th>
+            <th colspan="2">Card</th>
+            <th colspan="2">Chip</th>
+            <th colspan="2">Socket</th>
+          </tr>
+          <tr class="metric-header">
+            <th>Norm. MAE ↓</th>
+            <th>Cos ↑</th>
+            <th>Norm. MAE ↓</th>
+            <th>Cos ↑</th>
+            <th>Norm. MAE ↓</th>
+            <th>Cos ↑</th>
+            <th>Norm. MAE ↓</th>
+            <th>Cos ↑</th>
+            <th>Norm. MAE ↓</th>
+            <th>Cos ↑</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>PCA-AE<span class="note">linear reconstruction baseline</span></td>
+            <td>PCA</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr>
-            <td>PointNet-AE<span class="note">point-set autoencoder baseline</span></td>
+            <td>PointNet-AE</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+          </tr>
+          <tr>
+            <td>Conv-AE / ConvVAE</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td class="tbd">TBD</td><td class="tbd">TBD</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
           </tr>
           <tr class="row-ours row-ours-primary">
-            <td>TacVAE (Ours)<span class="note">latent tactile representation used by ForeTac</span></td>
+            <td>TacVAE (Ours)</td>
+            <td>0.039</td><td>0.998</td>
+            <td>0.110</td><td>0.986</td>
+            <td>0.039</td><td>0.998</td>
             <td class="tbd">TBD</td><td class="tbd">TBD</td>
+            <td>0.038</td><td>0.998</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="fig-caption"><strong>Table 3.</strong> Reconstruction quality and downstream control performance for tactile representation modules.</p>
+    <p class="fig-caption"><strong>Table 3.</strong> Latent reconstruction quality across the five task datasets. Norm. MAE measures normalized marker-field reconstruction error, while cosine similarity measures directional consistency of the reconstructed tactile deformation. Chip-grasping reconstruction evaluation is pending.</p>
 
     <h3>Foresight Prediction Quality</h3>
-    <p class="section-lead">Prediction accuracy is evaluated across foresight horizons. Final results will report the mean and variance over evaluation windows for every prediction metric.</p>
+    <p class="section-lead">The foresight model predicts future TacVAE latents, and the predicted latents are decoded back to marker displacement fields for evaluation.</p>
     <div class="content-card">
-      <img src="static/images/foresight_prediction_quality_horizons.png" alt="Foresight prediction quality across horizons">
+      <img src="static/images/foresight_prediction_quality_horizons.png" alt="Foresight prediction quality across horizons with decoded marker prediction error">
     </div>
-    <p class="fig-caption"><strong>Figure 4.</strong> Tactile foresight prediction accuracy across horizons H=1, 4, 8, 12, 16, measured by latent MAE, latent cosine similarity, and marker reconstruction error. The current curves show mean &plusmn; SEM over 32 validation windows; final reporting will include the corresponding mean and variance.</p>
+    <p class="fig-caption"><strong>Figure 4.</strong> Tactile foresight prediction accuracy across horizons H=1, 4, 8, 12, 16, measured by latent MAE, latent cosine similarity, and decoded marker prediction error.</p>
 
     <h3>Guidance Diagnostics</h3>
     <p class="section-lead">

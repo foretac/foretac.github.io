@@ -88,7 +88,7 @@ def plot(metrics: dict, out_path: Path) -> None:
         ),
         (
             "C",
-            "Marker Reconstruction Error (px) ↓",
+            "Decoded Marker Prediction Error (px) ↓",
             np.asarray(metrics["marker_reconstruction_error_px"]),
             np.asarray(metrics["marker_reconstruction_error_px_sem"]),
             "#b05238",
