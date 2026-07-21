@@ -117,11 +117,39 @@ TASKS = {
             "dataset": "observations/tac/left/img",
         },
         "bottom": {
-            "label": "Measured Marker Offset",
+            "label": "Predicted Marker Offset",
             "kind": "marker_hdf5",
             "path": ROOT / "outputs/multitask_replay_records/jiashupian_260709/20260710_164508_port8784_episode_1/trace_full.hdf5",
             "dataset": "observations/tac/left/marker_offset",
-            "display_vmax": 0.55,
+            "preprocess_marker": True,
+            "baseline_frames": 50,
+            "temporal_smooth": 9,
+            "deadband_scale": 1.35,
+            "gate_by_gripper": True,
+            "idle_raw_scale": 0.0,
+            "idle_motion_gain": 0.22,
+            "active_gain": 1.12,
+            "display_vmax": 0.34,
+        },
+    },
+    "generalization_visual_perturb": {
+        "title": "Generalization Test 1: Visual Perturbation",
+        "speed_label": "4x speed",
+        "trial": ROOT / "outputs/multitask_replay_records/card_260707/20260710_175728_port8783_episode_4",
+        "real": OUT / "generalization_visual_perturb_real.mp4",
+        "viz": OUT / "generalization_visual_perturb_viz.mp4",
+        "viz_preview": OUT / "generalization_visual_perturb_viz_preview.jpg",
+        "top": {
+            "label": "Tactile Image",
+            "kind": "tactile_hdf5",
+            "path": ROOT / "outputs/multitask_replay_records/card_260707/20260710_175728_port8783_episode_4/trace_full.hdf5",
+            "dataset": "observations/tac/left/img",
+        },
+        "bottom": {
+            "label": "Predicted Marker Offset",
+            "kind": "marker_hdf5",
+            "path": ROOT / "outputs/multitask_replay_records/card_260707/20260710_175728_port8783_episode_4/trace_full.hdf5",
+            "dataset": "observations/tac/left/marker_offset",
         },
     },
 }
@@ -265,6 +293,9 @@ def read_marker_hdf5(path: Path, dataset: str, cfg: dict):
         raise RuntimeError("marker HDF5 panel needs h5py; run in the TactileACT env") from exc
     with h5py.File(path, "r") as root:
         marker = root[dataset][()].astype(np.float32)
+    preprocess_meta = None
+    if cfg.get("preprocess_marker", False):
+        marker, preprocess_meta = preprocess_trace_marker(marker, path, cfg)
     vmax = float(cfg.get("display_vmax") or marker_vmax(marker))
     source_panel_size = int(cfg.get("source_panel_size", 620))
     displacement_scale = (source_panel_size * 0.085) / max(vmax, 1e-6)
@@ -277,7 +308,7 @@ def read_marker_hdf5(path: Path, dataset: str, cfg: dict):
             vmax=vmax,
         )
         frames.append(cv2.resize(panel, (SIDE_PANEL_SIZE, SIDE_PANEL_SIZE), interpolation=cv2.INTER_AREA))
-    return frames, {
+    meta = {
         "source": str(path),
         "dataset": dataset,
         "marker_vmax_p98": float(marker_vmax(marker)),
@@ -286,6 +317,10 @@ def read_marker_hdf5(path: Path, dataset: str, cfg: dict):
         "source_panel_size": source_panel_size,
         "render_style": "deformed_grid_turbo_homepage_dark_arrow",
     }
+    if preprocess_meta is not None:
+        meta["visual_preprocess"] = preprocess_meta
+        meta["render_style"] = "deformed_grid_turbo_homepage_stabilized_marker"
+    return frames, meta
 
 
 def marker_vmax(*arrays: np.ndarray) -> float:
@@ -367,7 +402,7 @@ def render_marker_panel(marker: np.ndarray, panel_size: int, displacement_scale:
     heat_color = cv2.applyColorMap(heat_img, cv2.COLORMAP_TURBO)
     panel = cv2.addWeighted(panel, 0.86, heat_color, 0.14, 0)
 
-    draw_poly_grid(panel, base, (214, 220, 228), 1)
+    draw_poly_grid(panel, base, (166, 176, 190), 1)
 
     for iy in range(marker.shape[0]):
         for ix in range(marker.shape[1]):
@@ -387,7 +422,9 @@ def render_marker_panel(marker: np.ndarray, panel_size: int, displacement_scale:
             color_idx = int(np.clip(heat[iy, ix] * 255, 0, 255))
             color = cv2.applyColorMap(np.array([[color_idx]], dtype=np.uint8), cv2.COLORMAP_TURBO)[0, 0]
             color_tuple = tuple(int(v) for v in color)
-            cv2.circle(panel, base_pt, 2, (160, 166, 176), -1, cv2.LINE_AA)
+            cv2.circle(panel, base_pt, 5, (255, 255, 255), -1, cv2.LINE_AA)
+            cv2.circle(panel, base_pt, 5, (88, 98, 114), 1, cv2.LINE_AA)
+            cv2.circle(panel, base_pt, 1, (48, 56, 70), -1, cv2.LINE_AA)
             cv2.circle(panel, cur_pt, 6, (255, 255, 255), -1, cv2.LINE_AA)
             cv2.circle(panel, cur_pt, 4, color_tuple, -1, cv2.LINE_AA)
 
@@ -471,7 +508,12 @@ def preprocess_trace_marker(marker: np.ndarray, path: Path, cfg: dict):
         gate = np.ones(len(active_marker), dtype=np.float32)
 
     idle_marker = baseline[0] * float(cfg.get("idle_raw_scale", 0.0))
-    marker_vis = idle_marker[None, ...] + active_marker * gate[:, None, None, None]
+    idle_motion = marker_rel * float(cfg.get("idle_motion_gain", 0.0))
+    marker_vis = (
+        idle_marker[None, ...]
+        + idle_motion * (1.0 - gate[:, None, None, None])
+        + active_marker * gate[:, None, None, None]
+    )
 
     return marker_vis.astype(np.float32), {
         "baseline_frames": baseline_frames,
@@ -481,6 +523,7 @@ def preprocess_trace_marker(marker: np.ndarray, path: Path, cfg: dict):
         "gate_first_nonzero": int(np.argmax(gate > 0.01)) if np.any(gate > 0.01) else None,
         "gate_last_nonzero": int(len(gate) - 1 - np.argmax(gate[::-1] > 0.01)) if np.any(gate > 0.01) else None,
         "idle_raw_scale": float(cfg.get("idle_raw_scale", 0.0)),
+        "idle_motion_gain": float(cfg.get("idle_motion_gain", 0.0)),
         "active_gain": float(cfg.get("active_gain", 1.0)),
         "display_vmax": cfg.get("display_vmax"),
     }

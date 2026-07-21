@@ -448,6 +448,12 @@ h3 {
 .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
 .video-grid.single { grid-template-columns: 1fr; max-width: 540px; margin-left: auto; margin-right: auto; }
 .video-grid.single.foresight-summary-grid { max-width: 1080px; }
+.video-grid.foresight-summary-grid {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: start;
+}
 .video-grid.board-demo-grid {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 24px;
@@ -546,10 +552,17 @@ h3 {
 
 .results-table-card {
   overflow-x: auto;
+  padding: 0;
+  width: min(1040px, calc(100vw - 48px));
+  margin: 0 auto;
 }
 
 .main-results-table {
-  min-width: 1180px;
+  min-width: 980px;
+}
+
+.tactile-results-table {
+  min-width: 960px;
 }
 
 .ablation-results-table { min-width: 820px; }
@@ -557,7 +570,7 @@ h3 {
 
 .comp-table th,
 .comp-table td {
-  padding: 12px 14px;
+  padding: 9px 9px;
   border-bottom: 1px solid var(--gray-200);
   text-align: left;
   vertical-align: top;
@@ -568,30 +581,52 @@ h3 {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--gray-600);
-  background: var(--gray-100);
-  position: sticky;
-  top: 0;
+  color: var(--text);
+  background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
+}
+
+.comp-table .task-header th {
+  text-align: center;
+  color: var(--navy);
+  background: linear-gradient(180deg, #FFF7ED 0%, #F5F3FF 100%);
+  border-bottom: 1px solid #D9DDE8;
+}
+
+.comp-table .task-header th:first-child {
+  text-align: left;
 }
 
 .comp-table .metric-header th {
-  font-size: 10px;
-  letter-spacing: 0.3px;
+  font-size: 9.5px;
+  letter-spacing: 0.2px;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--gray-600);
   background: #F8FAFC;
+  border-bottom: 2px solid var(--gray-200);
 }
 
-.comp-table td:first-child { font-weight: 600; white-space: nowrap; }
+.comp-table td:first-child { font-weight: 600; white-space: nowrap; min-width: 78px; }
 
 .main-results-table th:not(:first-child),
 .main-results-table td:not(:first-child),
 .ablation-results-table th:not(:first-child),
 .ablation-results-table td:not(:first-child),
 .module-results-table th:not(:first-child),
-.module-results-table td:not(:first-child) {
+.module-results-table td:not(:first-child),
+.tactile-results-table th:not(:first-child),
+.tactile-results-table td:not(:first-child) {
   text-align: center;
   white-space: nowrap;
+}
+
+.main-results-table td:first-child,
+.tactile-results-table td:first-child {
+  background: var(--white);
+}
+
+.main-results-table .row-ours td:first-child,
+.tactile-results-table .row-ours td:first-child {
+  background: #FFF7ED;
 }
 
 .comp-table .year {
